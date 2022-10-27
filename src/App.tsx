@@ -22,15 +22,29 @@ const  App: FC = () => {
   const [upload_index, set_upload_index] = useState<number>(-1)
   const [slices, set_slices] = useState<ISlice[]>([])
   const [is_upload, set_is_upload] = useState<boolean>(false)
+  const [file, set_file] = useState<File | null>(null)
 
   const controller = useRef<AbortController>()
 
   const percent = useMemo(() => (upload_index + 1) / slices.length * 100, [slices, upload_index] )
 
+  const handleFileMove = async () => {
+    await httpMergeFileRequest(file!.name)
+    httpRemoveFileRequest(file!.name)
+
+    set_is_upload(false)
+    set_slices([])
+    set_upload_index(-1)
+    set_file(null)
+  }
+
   /**
    * @description: 切片上传
   */
   const handleUpload = async () => {
+    if (upload_index >= slices.length) {
+      return handleFileMove()
+    }
     const formData = new FormData()
     formData.append('file', slices[upload_index].stream)
     formData.append('slice_index', upload_index as unknown as string)
@@ -41,13 +55,7 @@ const  App: FC = () => {
     if (upload_index < slices.length - 1) {
       set_upload_index(index => index + 1)
     } else if (upload_index === slices.length - 1) {
-      await httpMergeFileRequest(slices[0].name)
-      httpRemoveFileRequest(slices[0].name)
-
-      set_is_upload(false)
-      set_slices([])
-      set_upload_index(-1)
-
+      await handleFileMove()
     }
   }
 
@@ -81,6 +89,7 @@ const  App: FC = () => {
     }
     set_is_upload(true)
     set_slices(list)
+    set_file(file)
 
     const res = await httpCheckFileRequest(name)
 

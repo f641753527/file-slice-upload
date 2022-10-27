@@ -44,6 +44,9 @@ const uploadSliceFile = (req, res) => {
 
 const mergeTempFile = (req, res) => {
   const { fileName } = req.query
+  if (!fs.existsSync(fileDir)) {
+    fs.mkdirSync(fileDir)
+  }
   const tempFilePath =  path.resolve(tempFileDir, `./${fileName}`)
   if (!fs.existsSync(tempFilePath)) return res.json({ code: 400, message: '没有文件待合并', data: null })
 
