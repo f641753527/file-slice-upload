@@ -120,7 +120,6 @@ const  App: FC = () => {
       }
       { slices.length ? <p>当前上传文件: {slices[0].name}</p> : null }
       { slices.length ? <Progress percent={percent} /> : null }
-
     </div>
   );
 }
